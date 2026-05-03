@@ -1,81 +1,91 @@
 # Codebase Context Export
 
-Generated: 2026-05-03
+Generated: 2026-05-04
 
 ## Scope
 
-- Workspace contains two blockchain codebases: `munity/` for Anchor/Solana and `smart-contracts/` for Hardhat/EVM.
-- Filesystem metadata currently reports the same created and modified timestamp for all listed code files: `2026-05-03 15:36:49`.
+This repository is a contracts-only handoff repo. It contains:
+
+- `munity/` - Anchor/Solana program workspace.
+- `smart-contracts/` - Hardhat/EVM contract workspace.
+
+It does not contain the full web app. Fullstack paths referenced by older planning docs, such as `src/utils/solana/program.js`, `src/utils/solana/idl/munity.json`, `src/models/community.js`, and `.env.example`, are absent from this repository.
 
 ## Code File Inventory
 
-| Path | Title | Declared name or role | Created | Last modified |
-| --- | --- | --- | --- | --- |
-| `munity/tsconfig.json` | TypeScript config | TypeScript project config | 2026-05-03 15:36:49 | 2026-05-03 15:36:49 |
-| `munity/package.json` | Package manifest | Node package manifest; no package name declared | 2026-05-03 15:36:49 | 2026-05-03 15:36:49 |
-| `munity/tests/munity.ts` | Anchor test suite | `describe("munity")` | 2026-05-03 15:36:49 | 2026-05-03 15:36:49 |
-| `munity/migrations/deploy.ts` | Anchor deploy script | `module.exports = async function (provider)` | 2026-05-03 15:36:49 | 2026-05-03 15:36:49 |
-| `munity/Cargo.toml` | Cargo workspace manifest | Rust workspace manifest | 2026-05-03 15:36:49 | 2026-05-03 15:36:49 |
-| `munity/Anchor.toml` | Anchor config | Program alias `munity`; provider cluster `mainnet` | 2026-05-03 15:36:49 | 2026-05-03 15:36:49 |
-| `munity/programs/munity/src/lib.rs` | Solana program entrypoint | `pub mod munity`; `declare_id!` present | 2026-05-03 15:36:49 | 2026-05-03 15:36:49 |
-| `munity/programs/munity/Xargo.toml` | Xargo config | Rust cross-build config | 2026-05-03 15:36:49 | 2026-05-03 15:36:49 |
-| `munity/programs/munity/Cargo.toml` | Program crate manifest | `name = "munity"` | 2026-05-03 15:36:49 | 2026-05-03 15:36:49 |
-| `smart-contracts/package.json` | Hardhat package manifest | `name = "01"` | 2026-05-03 15:36:49 | 2026-05-03 15:36:49 |
-| `smart-contracts/hardhat.config.js` | Hardhat config | Network and explorer configuration | 2026-05-03 15:36:49 | 2026-05-03 15:36:49 |
-| `smart-contracts/scripts/verifyContract.js` | Verify script | Exports `verify` | 2026-05-03 15:36:49 | 2026-05-03 15:36:49 |
-| `smart-contracts/scripts/mineBlocks.js` | Mining helper script | `main()` increases time and mines one block | 2026-05-03 15:36:49 | 2026-05-03 15:36:49 |
-| `smart-contracts/scripts/maindeploy.js` | Main deploy script | `main()` deploys `Munity` and exercises buy/ownership flow | 2026-05-03 15:36:49 | 2026-05-03 15:36:49 |
-| `smart-contracts/contracts/munity.sol` | Solidity contract | `contract Munity is ERC1155, ERC2981, Ownable` | 2026-05-03 15:36:49 | 2026-05-03 15:36:49 |
-| `smart-contracts/test/sample-test.js` | Hardhat sample test helper | Defines `mineNBlocks(n)` | 2026-05-03 15:36:49 | 2026-05-03 15:36:49 |
+| Path | Role |
+| --- | --- |
+| `munity/Anchor.toml` | Anchor config; currently defaults to mainnet and old program ID. |
+| `munity/Cargo.toml` | Cargo workspace manifest. |
+| `munity/programs/munity/Cargo.toml` | Solana program crate manifest. |
+| `munity/programs/munity/src/lib.rs` | Anchor program source. |
+| `munity/tests/munity.ts` | Current test/admin script; mainnet-oriented and mostly commented. |
+| `munity/migrations/deploy.ts` | Empty Anchor deploy hook. |
+| `munity/package.json` | Anchor JS test dependencies and lint scripts. |
+| `smart-contracts/contracts/munity.sol` | Solidity ERC1155/ERC2981 community contract. |
+| `smart-contracts/hardhat.config.js` | Hardhat config; contains hardcoded provider/explorer material. |
+| `smart-contracts/scripts/maindeploy.js` | Local deploy/demo script. |
+| `smart-contracts/scripts/mineBlocks.js` | Local time/mining helper. |
+| `smart-contracts/scripts/verifyContract.js` | Hardhat verify helper. |
+| `smart-contracts/test/sample-test.js` | Minimal helper only, not a real test suite. |
+| `SOLANA_V2_RUST_PLAN_SMARTCONTRACTREDEPLOYMENT.md` | Current repo audit and v2 redeploy plan. |
+| `SOLANA_V2_RUST_EXPERT_HANDOFF_2026-05-03.md` | Current expert review request. |
+| `CODEX_HANDOFF_PROMPT_2026-05-04.md` | Direct prompt for next Codex implementation pass. |
 
-## Names Found In Code
+## Addresses and Keys Found
 
-- Solana program and crate name: `munity`
-- Solana test suite name: `munity`
-- Solidity contract name: `Munity`
-- Hardhat package name: `01`
-- Solidity internal display name: ` Munity`
-- Solidity internal symbol: `MU`
-
-## Blockchain Addresses And Keys Found
-
-### Concrete addresses and wallet references
-
-| Value | Type | Where found |
+| Value | Type | Where |
 | --- | --- | --- |
-| `34DuoQfRUGfLpWSsRapu1Fc3txeLfJr63pvYJJreXsHa` | Solana program ID | `munity/Anchor.toml`, `munity/programs/munity/src/lib.rs`, `munity/tests/munity.ts` |
-| `Dc55f1S5coiFEsuvM6jXYip93mvRxkUUYWkFsbFFwsay` | Solana public key for new owner in tests | `munity/tests/munity.ts` |
-| `~/.config/solana/id.json` | Local Solana wallet keypair path | `munity/Anchor.toml` |
+| `34DuoQfRUGfLpWSsRapu1Fc3txeLfJr63pvYJJreXsHa` | Current deployed Solana program ID | `munity/Anchor.toml`, `munity/programs/munity/src/lib.rs`, `munity/tests/munity.ts` |
+| `Dc55f1S5coiFEsuvM6jXYip93mvRxkUUYWkFsbFFwsay` | Expected Solana platform owner/treasury | `munity/tests/munity.ts`, planning docs |
+| `GFu2NXpjjwsP4VsA4VzwawEEU1rV7TbFiL7nTMaxBkjM` | Current deployed program upgrade authority per prior audit | planning docs |
+| `~/.config/solana/id.json` | Local Solana wallet path | `munity/Anchor.toml` |
+| `hmgNbqVFAngktTuwmAB2KceU06IJx-Fh` | Hardcoded Alchemy key fragment in fork URL | `smart-contracts/hardhat.config.js` |
+| `DTZ2S1S4M5DQD58AGCIF4P3I2HPVEEQGG4` | Hardcoded BNB explorer API key | `smart-contracts/hardhat.config.js` |
 
-### Hardcoded explorer/API keys
+## Current Solana Source Summary
 
-| Value | Type | Where found |
-| --- | --- | --- |
-| `CJ7TB195YK5BTVMHJGRZMD1XFU72BM41V1` | Commented Etherscan-style API key | `smart-contracts/hardhat.config.js` |
-| `DTZ2S1S4M5DQD58AGCIF4P3I2HPVEEQGG4` | Active BNB explorer API key | `smart-contracts/hardhat.config.js` |
+The Anchor source in `munity/programs/munity/src/lib.rs` is now present and should be treated as the v1/deployed-source baseline.
 
-### Environment key names referenced
+Current characteristics:
 
-| Key name | Purpose | Where found |
-| --- | --- | --- |
-| `ALCHEMY_API` | Mainnet or generic Alchemy API key | `smart-contracts/hardhat.config.js` |
-| `ALCHEMY_API_GOERLI` | Goerli RPC key reference | `smart-contracts/hardhat.config.js` |
-| `ALCHEMY_API_SEPOLIA` | Sepolia RPC key reference | `smart-contracts/hardhat.config.js` |
-| `ALCHEMY_API_MUMBAI` | Mumbai RPC key reference | `smart-contracts/hardhat.config.js` |
-| `ALCHEMY_API_BINANCE` | BSC QuickNode key reference | `smart-contracts/hardhat.config.js` |
-| `privateKey` | EVM deployer private key env var name | `smart-contracts/hardhat.config.js` |
+- program ID is still the old mainnet program ID,
+- platform config owner is signer at initialization,
+- default platform fee is hardcoded as `45` with `BASE = 1000`, so 4.5%,
+- ownership transfer is one-step,
+- whitelist uses per-user PDAs,
+- buyer limit uses current ATA balance,
+- payment uses `system_program::transfer`,
+- buy accounts constrain mint, creator recipient, and platform owner recipient,
+- Metaplex royalty value is `45` basis points, which is 0.45%, despite comments implying 4.5%.
 
-### Placeholders and symbolic identifiers
+## Current EVM Source Summary
 
-| Value | Type | Where found |
-| --- | --- | --- |
-| `PROGRAM_ID` | README placeholder token for a Solana program ID | `munity/README.md` |
-| `MPL_TOKEN_METADATA_PROGRAM_ID` | Imported symbolic program identifier | `munity/tests/munity.ts` |
-| `TOKEN_PROGRAM_ID` | Imported symbolic token program identifier | `munity/tests/munity.ts` |
-| `ASSOCIATED_TOKEN_PROGRAM_ID` | Imported symbolic associated token program identifier | `munity/tests/munity.ts` |
+The Solidity contract is an ERC1155/ERC2981 community contract with register, buy, whitelist, price, supply, discount, fee, and royalty functions.
 
-## Short Verification Notes
+Important review notes:
 
-- The Solana side is configured for mainnet in `Anchor.toml` and uses program ID `34DuoQfRUGfLpWSsRapu1Fc3txeLfJr63pvYJJreXsHa`.
-- The EVM side contains one active hardcoded explorer API key and one commented explorer API key in `hardhat.config.js`.
-- The EVM deployment config expects several RPC/API env vars plus one `privateKey` env var.
+- `buy` performs external ETH calls before updating supply and mint counters, creating a reentrancy risk.
+- `changeCommunityFee` lacks a `_newFees <= BASE` bound.
+- whitelist add/remove loops are unbounded.
+- Hardhat config contains hardcoded provider/explorer material that should be moved to env vars.
+
+## Fullstack Handoff Notes
+
+The app repo still needs a separate pass after Solana v2 is implemented:
+
+1. Replace or add the generated v2 IDL.
+2. Update PDA helper code to match v2 seeds and account shapes.
+3. Store `program_id` per Solana community.
+4. Backfill legacy Solana communities with old program ID `34DuoQfRUGfLpWSsRapu1Fc3txeLfJr63pvYJJreXsHa`.
+5. Query membership against both old and new program mints during migration.
+6. Update environment docs and deployment config for the new v2 program ID.
+
+## Local Validation Snapshot
+
+- `anchor --version`: failed, command not found.
+- `solana --version`: failed, command not found.
+- `rustc --version`: `rustc 1.90.0`.
+- `node --version`: `v22.19.0`.
+- `cargo check` in `munity/`: failed before code compilation because Windows linker `link.exe` is missing.
+- No `node_modules` directories were present, so Hardhat/Anchor JS tests were not run.
