@@ -1,56 +1,79 @@
-# Build the program (produces the .so binary in target/deploy/)
+# Munity Solana Program
+
+Anchor workspace for the Munity Solana program.
+
+## Safety Notice
+
+This source currently points at the existing mainnet program:
+
+`34DuoQfRUGfLpWSsRapu1Fc3txeLfJr63pvYJJreXsHa`
+
+`Anchor.toml` defaults to `mainnet`, and the current test file contains state-changing mainnet calls. Do not run tests or deploy commands against mainnet unless you are intentionally administering the live program with the correct wallet.
+
+For v2 redeploy work, generate a fresh program keypair and test on localnet/devnet first. Do not reuse the existing mainnet program ID.
+
+## Required Tools
+
+- Rust with native build tools.
+- Solana CLI.
+- Anchor CLI compatible with this workspace.
+- Node.js and Yarn/npm.
+
+On the audited Windows machine, `rustc` and Node were available, but `anchor`, `solana`, and the MSVC linker `link.exe` were missing. A Linux/WSL build environment is usually simpler for Anchor work.
+
+## Install
+
+```shell
+yarn install
+```
+
+or
+
+```shell
+npm install
+```
+
+## Common Commands
+
+Build:
+
+```shell
 anchor build
+```
 
-# Delete the program build
+Clean:
+
+```shell
 anchor clean
+```
 
-# Deploy the program (choose cluster: localnet, devnet, testnet, or mainnet)
-anchor deploy --provider.cluster <cluster_name>
+Run local tests only after the test file has been converted away from mainnet:
 
-# Generate a new keypair for the program (creates munity-keypair.json)
+```shell
+anchor test
+```
+
+Deploy to devnet:
+
+```shell
+anchor deploy --provider.cluster devnet
+```
+
+Generate a new program keypair for v2:
+
+```shell
 solana-keygen new --outfile target/deploy/munity-keypair.json --force
-
-# install the node modules if needed
-yarn or npm install
-
-# Run tests against devnet (skip redeploy, use existing deploy)
-anchor test --skip-deploy --provider.cluster devnet
-
-# View on-chain logs for a deployed program
-solana logs <PROGRAM_ID> --url https://api.devnet.solana.com
-
-# Get the compiled binary size (in bytes) of your program
-wc -c < target/deploy/<your_program>.so
-
-# Check the rent-exempt minimum balance required for that size on mainnet
-solana rent <BYTES> --url https://api.mainnet-beta.solana.com
-
-# to change the config of solana
-solana config set --url https://api.mainnet-beta.solana.com
-
-# to get the solana config
-solana config get
-
-# To sync the program id in the whole project
 anchor keys sync
+```
 
-# To check the program is deployed
-solana program show <PROGRAM_ID> --url https://api.devnet.solana.com
+Never commit deploy keypair files.
 
-# To close the deployed program
-solana program close <PROGRAM_ID> --bypass-warning --url https://api.devnet.solana.com
+## Current v1 Source Notes
 
-# To get the airdrop on devnet
-solana airdrop 2 --url https://api.devnet.solana.com
+- Platform fee uses `BASE = 1000`; `45` means 4.5%.
+- Metaplex metadata royalty uses basis points; `45` means 0.45%, not 4.5%.
+- Ownership transfer is currently one-step.
+- Whitelist is currently per-address PDA based.
+- Per-user limit currently checks the buyer's ATA balance, not cumulative historical mints.
 
-# TIP
-no need to write (https://api.devnet.solana.com) if you have already set the environment to devnet, testnet or mainnnet
-
-# versions
-Installed Versions:
-Rust: rustc 1.90.0
-Solana CLI: solana-cli 1.18.12
-Anchor CLI: 0.29.0
-Node.js: v24.4.1
-Yarn: 1.22.22
-
+See `../SOLANA_V2_RUST_PLAN_SMARTCONTRACTREDEPLOYMENT.md` for the v2 plan.
