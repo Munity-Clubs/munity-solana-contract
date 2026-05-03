@@ -26,4 +26,7 @@ yarn-error.log*
 
 # Docs artifacts
 docs/archived/
-docs/.DS_Store
+
+# macOS Finder metadata
+.DS_Store
+**/.DS_Store
