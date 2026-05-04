@@ -5,18 +5,27 @@ target/
 **/*.dylib
 **/*.dll
 
+# Anchor caches
+.anchor/
+**/.anchor/
+
 # Node dependencies
 node_modules/
 **/node_modules/
 
 # Local environment and secrets
 .env
+.env*
 **/.env
 *.local
+!.env.example
 
-# Solana/Anchor deploy keypairs
-**/target/deploy/*keypair*.json
+# Solana / Anchor deploy and program keypairs — never commit private keys
+**/target/deploy/*-keypair.json
 **/target/deploy/*.json
+**/*-keypair.json
+*.mnemonic
+**/secrets/
 
 # Logs
 *.log
