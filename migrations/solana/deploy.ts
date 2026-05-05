@@ -10,10 +10,10 @@
  *   3. Re-fetches PlatformConfig and asserts every field matches expected
  *   4. Logs program ID, PDAs, balance, and tx signature for the founder's records
  *
- * Run from tests/solana/ (where Node deps are installed):
+ * Run from migrations/solana/ (deps installed via `yarn install` there):
  *
- *   cd tests/solana
- *   npx ts-node ../../migrations/solana/deploy.ts \
+ *   cd migrations/solana
+ *   npx ts-node deploy.ts \
  *     --cluster devnet \
  *     --wallet ~/.config/solana/munity-devnet-deploy.json \
  *     --owner Dc55f1S5coiFEsuvM6jXYip93mvRxkUUYWkFsbFFwsay \

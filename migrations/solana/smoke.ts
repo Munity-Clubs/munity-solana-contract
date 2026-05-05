@@ -6,10 +6,10 @@
  *
  * Run AFTER `deploy.ts` has successfully initialized the platform.
  *
- * Run from tests/solana/ (where Node deps are installed):
+ * Run from migrations/solana/ (deps installed via `yarn install` there):
  *
- *   cd tests/solana
- *   npx ts-node ../../migrations/solana/smoke.ts \
+ *   cd migrations/solana
+ *   npx ts-node smoke.ts \
  *     --cluster devnet \
  *     --wallet ~/.config/solana/munity-devnet-deploy.json
  *
