@@ -296,7 +296,11 @@ async function main(): Promise<void> {
     "SOL"
   );
 
-  const buyTx = await program.methods
+  // Build the tx and explicitly set buyer as fee payer.
+  // Default Anchor.rpc() uses provider wallet as fee payer (= creator here),
+  // which contaminates creator_balance_delta with tx fees. Forcing buyer as
+  // fee payer keeps the creator_share assertion exact.
+  const buyIxTx = await program.methods
     .buyNft(reg.id, new BN(1), null)
     .accounts({
       signer: buyer.publicKey,
@@ -313,8 +317,16 @@ async function main(): Promise<void> {
       systemProgram: SystemProgram.programId,
       rent: SYSVAR_RENT_PUBKEY,
     } as any)
-    .signers([buyer])
-    .rpc({ commitment: "confirmed" });
+    .transaction();
+  buyIxTx.feePayer = buyer.publicKey;
+  const { blockhash } = await connection.getLatestBlockhash("confirmed");
+  buyIxTx.recentBlockhash = blockhash;
+  const buyTx = await sendAndConfirmTransaction(
+    connection,
+    buyIxTx,
+    [buyer],
+    { commitment: "confirmed" }
+  );
   console.log("buy_nft tx:            ", buyTx);
 
   const ataAcc = await getAccount(connection, buyerAta);
