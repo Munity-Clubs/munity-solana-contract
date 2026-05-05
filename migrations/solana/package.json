@@ -1,24 +1,19 @@
 {
-    "name": "munity-tests",
+    "name": "munity-migrations",
     "version": "0.1.0",
     "private": true,
+    "description": "Deploy + smoke scripts for Munity v2. Run via npx ts-node from this directory.",
     "scripts": {
-        "test": "ts-mocha -p ./tsconfig.json -t 1000000 *.test.ts"
+        "deploy": "ts-node deploy.ts",
+        "smoke": "ts-node smoke.ts"
     },
     "dependencies": {
         "@coral-xyz/anchor": "^0.31.0",
-        "@noble/hashes": "^1.4.0",
         "@solana/spl-token": "^0.4.13",
         "@solana/web3.js": "^1.95.0"
     },
     "devDependencies": {
-        "@types/bn.js": "^5.1.5",
-        "@types/chai": "^4.3.16",
-        "@types/mocha": "^10.0.7",
         "@types/node": "^20.14.0",
-        "chai": "^4.4.1",
-        "mocha": "^10.4.0",
-        "ts-mocha": "^10.0.0",
         "ts-node": "^10.9.2",
         "typescript": "^5.4.5"
     }
