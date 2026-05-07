@@ -60,4 +60,6 @@ pub enum ErrorCode {
     MathOverflow,
     #[msg("Invalid price mode for the requested operation")]
     InvalidPriceMode,
+    #[msg("Creator splits must be 1..=4 entries summing to CREATOR_SHARE (80) with the signer included; no duplicates or default pubkeys")]
+    InvalidCreatorSplits,
 }

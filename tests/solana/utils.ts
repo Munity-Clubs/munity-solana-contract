@@ -160,6 +160,11 @@ export async function ensurePlatformInitialized(
   return { platformConfig, counter };
 }
 
+export interface CreatorSplitArg {
+  address: PublicKey;
+  share: number;
+}
+
 export interface RegisterArgs {
   name: string;
   symbol: string;
@@ -171,6 +176,7 @@ export interface RegisterArgs {
   maxPerWallet?: BN | null;
   whitelistRoot?: Buffer;
   whitelistDiscountBps?: number;
+  creatorSplits?: CreatorSplitArg[] | null;
 }
 
 export interface RegisterResult {
@@ -207,6 +213,7 @@ export async function registerCommunity(
       maxPerWallet: args.maxPerWallet ?? null,
       whitelistRoot: Array.from(args.whitelistRoot ?? EMPTY_ROOT),
       whitelistDiscountBps: args.whitelistDiscountBps ?? 0,
+      creatorSplits: args.creatorSplits ?? null,
     })
     .accounts({
       signer: creator.publicKey,
@@ -268,6 +275,101 @@ export function buyAccounts(
     rent: SYSVAR_RENT_PUBKEY,
     ...overrides,
   };
+}
+
+export interface MetaplexCreator {
+  address: PublicKey;
+  verified: boolean;
+  share: number;
+}
+
+export interface MetaplexMetadata {
+  updateAuthority: PublicKey;
+  mint: PublicKey;
+  name: string;
+  symbol: string;
+  uri: string;
+  sellerFeeBasisPoints: number;
+  creators: MetaplexCreator[] | null;
+}
+
+/**
+ * Manual borsh decoder for the Metaplex MetadataV1 account layout.
+ *
+ * On-chain stored format ("puffed" — strings are length-prefixed but the
+ * content is zero-padded out to MAX_*_LENGTH per Metaplex's puffed_out_string).
+ * We trim trailing nulls to recover the actual string. Keeps the test free of
+ * an extra Metaplex SDK dependency.
+ *
+ * Layout:
+ *   1   key (4 = MetadataV1)
+ *   32  update_authority
+ *   32  mint
+ *   4   name length (LE u32, == MAX_NAME_LENGTH = 32)
+ *   32  name (zero-padded)
+ *   4   symbol length (LE u32, == MAX_SYMBOL_LENGTH = 10)
+ *   10  symbol (zero-padded)
+ *   4   uri length (LE u32, == MAX_URI_LENGTH = 200)
+ *   200 uri (zero-padded)
+ *   2   seller_fee_basis_points (LE u16)
+ *   1   creators option tag (0 or 1)
+ *   if 1:
+ *     4   creators vec length (LE u32)
+ *     each creator (34 bytes): 32 address, 1 verified, 1 share
+ *   ...remainder ignored
+ */
+export async function fetchMetaplexMetadata(
+  connection: Connection,
+  metadataAddr: PublicKey
+): Promise<MetaplexMetadata> {
+  const info = await connection.getAccountInfo(metadataAddr);
+  if (!info) throw new Error(`metadata not found: ${metadataAddr.toBase58()}`);
+  const buf = info.data;
+
+  let off = 1; // skip key
+  const updateAuthority = new PublicKey(buf.slice(off, off + 32));
+  off += 32;
+  const mint = new PublicKey(buf.slice(off, off + 32));
+  off += 32;
+
+  function readPuffedString(maxLen: number): string {
+    const len = buf.readUInt32LE(off);
+    off += 4;
+    const raw = buf.slice(off, off + len);
+    off += len;
+    // strip trailing nulls (Metaplex puffs strings to MAX_*_LENGTH)
+    let end = raw.length;
+    while (end > 0 && raw[end - 1] === 0) end--;
+    return raw.slice(0, end).toString("utf-8");
+    // maxLen unused here — it's documentation; we trust the on-chain length prefix
+  }
+
+  const name = readPuffedString(32);
+  const symbol = readPuffedString(10);
+  const uri = readPuffedString(200);
+
+  const sellerFeeBasisPoints = buf.readUInt16LE(off);
+  off += 2;
+
+  const creatorsTag = buf.readUInt8(off);
+  off += 1;
+  let creators: MetaplexCreator[] | null = null;
+  if (creatorsTag === 1) {
+    const n = buf.readUInt32LE(off);
+    off += 4;
+    creators = [];
+    for (let i = 0; i < n; i++) {
+      const address = new PublicKey(buf.slice(off, off + 32));
+      off += 32;
+      const verified = buf.readUInt8(off) === 1;
+      off += 1;
+      const share = buf.readUInt8(off);
+      off += 1;
+      creators.push({ address, verified, share });
+    }
+  }
+
+  return { updateAuthority, mint, name, symbol, uri, sellerFeeBasisPoints, creators };
 }
 
 export async function expectError(
