@@ -8,6 +8,16 @@ pub enum PriceMode {
     UsdPegged,
 }
 
+/// One creator entry passed to `register_community` when splitting the creator
+/// royalty share across multiple collaborators (music drops, art collabs, etc.).
+/// Not stored on-chain — only used as an input arg; persisted-to-Metaplex via
+/// the DataV2 creators array.
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, Debug)]
+pub struct CreatorSplit {
+    pub address: Pubkey,
+    pub share: u8,
+}
+
 #[account]
 #[derive(InitSpace)]
 pub struct PlatformConfig {

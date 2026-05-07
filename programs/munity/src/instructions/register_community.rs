@@ -13,7 +13,7 @@ use crate::constants::{
 };
 use crate::errors::ErrorCode;
 use crate::events::CommunityRegistered;
-use crate::state::{GlobalCounter, PlatformConfig, PriceMode, Registry};
+use crate::state::{CreatorSplit, GlobalCounter, PlatformConfig, PriceMode, Registry};
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct RegisterCommunityArgs {
@@ -27,6 +27,12 @@ pub struct RegisterCommunityArgs {
     pub max_per_wallet: Option<u64>,
     pub whitelist_root: [u8; 32],
     pub whitelist_discount_bps: u16,
+    /// Optional collaborator royalty splits. `None` (or `Some(vec![signer @ 80])`)
+    /// preserves the legacy solo-creator shape. With splits, 1..=4 entries must
+    /// sum to `CREATOR_SHARE` (80), include the signer, contain no duplicates,
+    /// and exclude the default Pubkey. Platform royalty (`PLATFORM_ROYALTY_SHARE` = 20)
+    /// is always appended; total entries ≤ 5 (Metaplex max).
+    pub creator_splits: Option<Vec<CreatorSplit>>,
 }
 
 pub(crate) fn handler(ctx: Context<RegisterCommunity>, args: RegisterCommunityArgs) -> Result<u64> {
@@ -41,6 +47,7 @@ pub(crate) fn handler(ctx: Context<RegisterCommunity>, args: RegisterCommunityAr
         max_per_wallet,
         whitelist_root,
         whitelist_discount_bps,
+        creator_splits,
     } = args;
 
     require!(name.len() <= MAX_NAME_LEN, ErrorCode::NameTooLong);
@@ -87,18 +94,59 @@ pub(crate) fn handler(ctx: Context<RegisterCommunity>, args: RegisterCommunityAr
     registry.uri = uri.clone();
     registry.bump = ctx.bumps.registry;
 
-    let creators = Some(vec![
-        Creator {
-            address: ctx.accounts.signer.key(),
-            verified: false,
-            share: CREATOR_SHARE,
-        },
-        Creator {
-            address: ctx.accounts.platform_config.platform_royalty_wallet,
-            verified: false,
-            share: PLATFORM_ROYALTY_SHARE,
-        },
-    ]);
+    let signer_key = ctx.accounts.signer.key();
+    let mut creators_vec: Vec<Creator> = match creator_splits {
+        None => {
+            // Backward compatible: solo creator gets the full CREATOR_SHARE.
+            vec![Creator {
+                address: signer_key,
+                verified: false,
+                share: CREATOR_SHARE,
+            }]
+        }
+        Some(splits) => {
+            require!(
+                !splits.is_empty() && splits.len() <= 4,
+                ErrorCode::InvalidCreatorSplits
+            );
+            let total: u32 = splits.iter().map(|s| s.share as u32).sum();
+            require!(
+                total == CREATOR_SHARE as u32,
+                ErrorCode::InvalidCreatorSplits
+            );
+            // Signer MUST be in the creators list — sign_metadata below requires
+            // the signer to be a creator (Metaplex enforces this).
+            require!(
+                splits.iter().any(|s| s.address == signer_key),
+                ErrorCode::InvalidCreatorSplits
+            );
+            for (i, s) in splits.iter().enumerate() {
+                require!(
+                    s.address != Pubkey::default(),
+                    ErrorCode::InvalidCreatorSplits
+                );
+                for s2 in splits.iter().skip(i + 1) {
+                    require!(s.address != s2.address, ErrorCode::InvalidCreatorSplits);
+                }
+            }
+            splits
+                .iter()
+                .map(|s| Creator {
+                    address: s.address,
+                    verified: false,
+                    share: s.share,
+                })
+                .collect()
+        }
+    };
+
+    // Platform royalty entry is always appended; creators cannot opt out.
+    creators_vec.push(Creator {
+        address: ctx.accounts.platform_config.platform_royalty_wallet,
+        verified: false,
+        share: PLATFORM_ROYALTY_SHARE,
+    });
+    let creators = Some(creators_vec);
 
     let data = DataV2 {
         name,
@@ -125,7 +173,11 @@ pub(crate) fn handler(ctx: Context<RegisterCommunity>, args: RegisterCommunityAr
         rent: ctx.accounts.rent.to_account_info(),
     };
     let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
-    create_metadata_accounts_v3(cpi_ctx, data, false, true, None)?;
+    // is_mutable = true so creators can edit name/symbol/uri post-mint via
+    // change_metadata. Update authority is the mint_authority PDA — so only
+    // the program (and only when the Registry creator signs change_metadata)
+    // can mutate the on-chain Metaplex metadata.
+    create_metadata_accounts_v3(cpi_ctx, data, true, true, None)?;
 
     let cpi_program = ctx.accounts.token_metadata_program.to_account_info();
     let cpi_accounts = SignMetadata {

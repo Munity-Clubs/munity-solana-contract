@@ -11,6 +11,8 @@ import {
   ZERO_PUBKEY,
   BASE,
   DEFAULT_FEE_BPS,
+  fetchMetaplexMetadata,
+  TOKEN_METADATA_PROGRAM_ID,
 } from "./utils";
 
 describe("admin gating", () => {
@@ -212,7 +214,7 @@ describe("admin gating", () => {
       expect(r2.maxPerWallet).to.be.null;
     });
 
-    it("change_metadata creator-only + length checks", async () => {
+    it("change_metadata propagates to Metaplex; creators preserved; creator-only + length checks", async () => {
       const reg = await registerCommunity(ctx, ctx.owner, {
         name: "Meta",
         symbol: "MT",
@@ -221,23 +223,90 @@ describe("admin gating", () => {
         priceValue: new BN(LAMPORTS_PER_SOL),
         discount: 0,
       });
+
+      // Snapshot pre-change Metaplex creators array.
+      const before = await fetchMetaplexMetadata(ctx.connection, reg.metadata);
+      expect(before.name).to.equal("Meta");
+      expect(before.symbol).to.equal("MT");
+      expect(before.uri).to.equal("https://x/mt.json");
+      expect(before.sellerFeeBasisPoints).to.equal(450);
+      expect(before.creators).to.not.be.null;
+      const beforeCreators = before.creators!.map((c) => ({
+        address: c.address.toBase58(),
+        verified: c.verified,
+        share: c.share,
+      }));
+
       await ctx.program.methods
         .changeMetadata("New Name", "NN", "https://x/new.json")
-        .accounts({ signer: ctx.owner.publicKey, registry: reg.registry } as any)
+        .accounts({
+          signer: ctx.owner.publicKey,
+          registry: reg.registry,
+          mint: reg.mint,
+          mintAuthority: reg.mintAuthority,
+          metadataAccount: reg.metadata,
+          tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
+        } as any)
         .signers([ctx.owner])
         .rpc();
+
+      // Registry mutated.
       const r = await ctx.program.account.registry.fetch(reg.registry);
       expect(r.name).to.equal("New Name");
       expect(r.symbol).to.equal("NN");
+      expect(r.uri).to.equal("https://x/new.json");
 
+      // Metaplex on-chain metadata also propagated.
+      const after = await fetchMetaplexMetadata(ctx.connection, reg.metadata);
+      expect(after.name).to.equal("New Name");
+      expect(after.symbol).to.equal("NN");
+      expect(after.uri).to.equal("https://x/new.json");
+      // Royalty bps and creators preserved across the update.
+      expect(after.sellerFeeBasisPoints).to.equal(before.sellerFeeBasisPoints);
+      expect(after.creators).to.not.be.null;
+      const afterCreators = after.creators!.map((c) => ({
+        address: c.address.toBase58(),
+        verified: c.verified,
+        share: c.share,
+      }));
+      expect(afterCreators).to.deep.equal(beforeCreators);
+
+      // Length checks still fire pre-CPI.
       await expectError(
         () =>
           ctx.program.methods
             .changeMetadata("a".repeat(65), "S", "u")
-            .accounts({ signer: ctx.owner.publicKey, registry: reg.registry } as any)
+            .accounts({
+              signer: ctx.owner.publicKey,
+              registry: reg.registry,
+              mint: reg.mint,
+              mintAuthority: reg.mintAuthority,
+              metadataAccount: reg.metadata,
+              tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
+            } as any)
             .signers([ctx.owner])
             .rpc(),
         "NameTooLong"
+      );
+
+      // Non-creator caller still rejected with Unauthorized.
+      const stranger = Keypair.generate();
+      await airdrop(ctx.connection, stranger.publicKey, 1);
+      await expectError(
+        () =>
+          ctx.program.methods
+            .changeMetadata("Anything", "X", "u")
+            .accounts({
+              signer: stranger.publicKey,
+              registry: reg.registry,
+              mint: reg.mint,
+              mintAuthority: reg.mintAuthority,
+              metadataAccount: reg.metadata,
+              tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
+            } as any)
+            .signers([stranger])
+            .rpc(),
+        "Unauthorized"
       );
     });
   });
