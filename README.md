@@ -20,8 +20,9 @@ is not the live v2 program.
 
 Use [`docs/SOLANA_V2_PUBLIC_PROOF_GRANT_PACKET.md`](docs/SOLANA_V2_PUBLIC_PROOF_GRANT_PACKET.md)
 as the reviewer-facing attachment for grant submissions. It contains on-chain
-program proof, source pointers, custody facts, and the remaining follow-up checks
-before anyone claims a verified build or live on-chain `security_txt`.
+program proof, source pointers, custody facts, verifiable-build status, and the
+remaining follow-up steps before anyone claims the current source matches live
+ProgramData or live on-chain `security_txt`.
 
 ## Useful Docs
 
