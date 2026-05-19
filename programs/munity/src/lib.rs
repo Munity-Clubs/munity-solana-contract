@@ -21,9 +21,9 @@ security_txt! {
     name: "Munity v2",
     project_url: "https://munity.club",
     contacts: "email:security@munity.club,link:https://twitter.com/munityclub",
-    policy: "https://github.com/kidofthenorth/Munity-Smart-Contracts/blob/main/SECURITY.md",
+    policy: "https://github.com/kidofthenorth/Munity-Solana-Smart-Contract/blob/main/SECURITY.md",
     preferred_languages: "en",
-    source_code: "https://github.com/kidofthenorth/Munity-Smart-Contracts",
+    source_code: "https://github.com/kidofthenorth/Munity-Solana-Smart-Contract",
     source_release: "v2.0.1",
     auditors: "None",
     acknowledgements: "The following researchers have responsibly disclosed vulnerabilities: (none yet)"
