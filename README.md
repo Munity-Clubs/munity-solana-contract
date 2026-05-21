@@ -12,9 +12,7 @@ Public source for the Munity v2 Solana community program.
 | Upgrade authority | `3oeoz8sLVLsMkGVsBC5Eo3qZWU8xfw5MpZZWpFN9Euzn` (Squads vault PDA) |
 | License | Apache-2.0 |
 
-The root Anchor workspace is the active v2 source. The nested `munity/`
-directory is retained as historical source context for the original v1 import and
-is not the live v2 program.
+The active v2 source lives in [`programs/munity`](programs/munity).
 
 ## Security
 
