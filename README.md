@@ -16,20 +16,9 @@ The root Anchor workspace is the active v2 source. The nested `munity/`
 directory is retained as historical source context for the original v1 import and
 is not the live v2 program.
 
-## Grant / Reviewer Packet
+## Security
 
-Use [`docs/SOLANA_V2_PUBLIC_PROOF_GRANT_PACKET.md`](docs/SOLANA_V2_PUBLIC_PROOF_GRANT_PACKET.md)
-as the reviewer-facing attachment for grant submissions. It contains on-chain
-program proof, source pointers, custody facts, verifiable-build status, and the
-remaining follow-up steps before anyone claims the current source matches live
-ProgramData or live on-chain `security_txt`.
-
-## Useful Docs
-
-- [`docs/SOLANA_V2_PUBLIC_PROOF_GRANT_PACKET.md`](docs/SOLANA_V2_PUBLIC_PROOF_GRANT_PACKET.md)
-- [`docs/SOLANA_V2_WEBAPP_HANDOFF.md`](docs/SOLANA_V2_WEBAPP_HANDOFF.md)
-- [`docs/SOLANA_V2_MAINNET_RUNBOOK.md`](docs/SOLANA_V2_MAINNET_RUNBOOK.md)
-- [`SECURITY.md`](SECURITY.md)
+See [`SECURITY.md`](SECURITY.md) for the security policy and disclosure contact.
 
 ## Local Validation Notes
 

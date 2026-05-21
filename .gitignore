@@ -33,7 +33,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Docs artifacts
+# Docs — internal/operational, not for public repo
+docs/
 docs/archived/
 
 # macOS Finder metadata
