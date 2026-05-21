@@ -33,7 +33,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Docs — internal/operational, not for public repo
+# Docs and session handoffs — internal/operational, not for public repo
+HANDOFF.md
+HANDOFF_*.md
 docs/
 docs/archived/
 
