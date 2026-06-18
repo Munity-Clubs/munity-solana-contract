@@ -1,5 +1,11 @@
 # Munity Smart Contracts
 
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](./LICENSE)
+[![Verified Build](https://img.shields.io/badge/verified-OtterSec-green?style=flat-square)](https://verify.osec.io/status/4PeTcJYm5rPj4AU3Lq72nhpbyUxny2vJDTW6XUdpDDpk)
+[![Upgrade Authority](https://img.shields.io/badge/upgrade-Squads%202%2F2-blue?style=flat-square)](https://explorer.solana.com/address/3oeoz8sLVLsMkGVsBC5Eo3qZWU8xfw5MpZZWpFN9Euzn)
+[![Security Policy](https://img.shields.io/badge/security-policy-blue?style=flat-square)](./SECURITY.md)
+[![Handoff](https://img.shields.io/badge/handoff-doc-green?style=flat-square)](./HANDOFF.md)
+
 Public source for the Munity v2 Solana community program.
 
 ## Current Program
